@@ -25,7 +25,6 @@ terminus -n drush "$P_SITE.$P_ENV" -- updatedb -y
 terminus -n drush "$P_SITE.$P_ENV" -- cr
 
 if [[ "$P_ENV" != 'live' ]]; then
-  echo 'UPDATE file_managed SET uri = REPLACE(uri, "s3://", "public://");' | terminus drush "$P_SITE.$P_ENV" sql:cli
   terminus -n drush "$P_SITE.$P_ENV" -- pm-enable stage_file_proxy -y
 fi
 
@@ -48,6 +47,11 @@ if [ -f "config/splits/_config_splits/config_split.config_split.config_splits.ym
   fi
 fi
 
+echo "Refreshing s3fs cache."
+# If s3fs is active, refresh the s3fs cache.
+if [ -f "config/default/s3fs.settings.yml" ] ; then
+  terminus -n drush "$P_SITE.$P_ENV" -- s3fs:refresh-cache
+fi
 
 # If exported configuration is available, then import it.
 if [ -f "config/default/system.site.yml" ] ; then
