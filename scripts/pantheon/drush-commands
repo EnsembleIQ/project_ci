@@ -25,7 +25,7 @@ terminus -n drush "$P_SITE.$P_ENV" -- updatedb -y
 terminus -n drush "$P_SITE.$P_ENV" -- cr
 
 if [[ "$P_ENV" != 'live' ]]; then
-  terminus -n drush "$P_SITE.$P_ENV" -- pm-enable stage_file_proxy -y
+  terminus -n drush "$P_SITE.$P_ENV" -- pm-enable stage_file_proxy s3fs -y
 fi
 
 echo "Importing config splits."
