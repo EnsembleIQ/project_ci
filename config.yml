@@ -178,7 +178,7 @@ env: &env
   #
   # Default: NO
   #
-  REBUILD_DEVELOPMENT_ENV_EVERY_PUSH: YES
+  REBUILD_DEVELOPMENT_ENV_EVERY_PUSH: "YES"
 
 
   # Define the name of the multidev used for the Github development branch. Must
@@ -186,7 +186,9 @@ env: &env
   #
   # Default: github-dev
   #
-  DEVELOPMENT_ENV: circleci
+  DEVELOPMENT_ENV: preview
+  # Cause our code reeks, we don't want to sniff it.
+  SKIP_CODE_SNIFF: "YES"
 
 
   ###########################
@@ -221,6 +223,9 @@ pantheon: &pantheon
 jobs:
   update_dependencies:
     <<: *defaults
+    environment:
+      <<: *env
+      COMPOSER_DISCARD_CHANGES: true
     steps:
       - setup-project
       - run:
@@ -233,7 +238,14 @@ jobs:
             git config --global user.email "$GIT_EMAIL"
             git config --global user.name "CI Bot"
             git config --global core.fileMode false
-      - run: "git add . && git commit -am \"Updating dependencies\" && git push origin $CIRCLE_BRANCH"
+      - run:
+          name: Upgrade all dependencies and commit
+          command: |
+            if [ -f "./.circleci/scripts/build/update_dependencies" ]; then
+              ./.circleci/scripts/build/update_dependencies
+            else
+              ./vendor/ensembleiq/project_ci/scripts/build/update_dependencies
+            fi
 
   # Static Testing. This will run independently of a build to fail quickly.
   static_tests:
@@ -325,27 +337,8 @@ jobs:
   deploy_to_test_live_pantheon:
     <<: *pantheon
     steps:
-      - setup-project:
-          cache-version: pantheon-v1
-      - run:
-          name: setup-environment-vars
-          command: |
-            if [ -f "./.circleci/scripts/set-environment" ]; then
-              ./.circleci/scripts/set-environment
-            else
-              ./vendor/ensembleiq/project_ci/scripts/set-environment
-            fi
-      - run:
-          name: deploy to Pantheon
-          command: |
-            if [ -f "./.circleci/scripts/deploy_to_test_live" ]; then
-              ./.circleci/scripts/deploy_to_test_live
-            else
-              ./vendor/ensembleiq/project_ci/scripts/pantheon/deploy_to_test_live
-            fi
-          no_output_timeout: 30m
-
-
+      - deploy-to-pantheon-env:
+          environment: << pipeline.parameters.push_deploy_env >>
 
   # Run this on one of the main branches to push a release back to github.
   #
@@ -379,7 +372,7 @@ jobs:
             if [ -f "./.circleci/scripts/db-backup" ]; then
               ./.circleci/scripts/db-backup
             else
-              ./vendor/ensembleiq/project_ci/scripts/db-backup
+              ./vendor/ensembleiq/project_ci/scripts/chores/db-backup
             fi
       - run:
           name: Backup Files on S3
@@ -387,22 +380,11 @@ jobs:
             if [ -f "./.circleci/scripts/files-backup" ]; then
               ./.circleci/scripts/files-backup
             else
-              ./vendor/ensembleiq/project_ci/scripts/files-backup
+              ./vendor/ensembleiq/project_ci/scripts/chores/files-backup
             fi
 
 workflows:
   version: 2
-
-  scheduled_update_check:
-    when: << pipeline.parameters.run-sec-updates-check >>
-    jobs:
-      - security_updates_check:
-          filters:
-            branches:
-              only:
-                - 'main'
-                - 'master'
-
   build-deploy-pantheon:
     when:
       and:
@@ -424,10 +406,6 @@ workflows:
         - equal: [ test, << pipeline.parameters.push_deploy_env >> ]
     jobs:
       - deploy_to_test_live_pantheon
-          #filters:
-          #  branches:
-          #    only:
-          #      - master
   update_check:
     when: << pipeline.parameters.run_dependency_update >>
     jobs:
@@ -682,10 +660,10 @@ commands:
             - run:
                 name: deploy to Pantheon
                 command: |
-                  if [ -f "./.circleci/scripts/deploy-to-<< parameters.environment >>" ]; then
-                    ./.circleci/scripts/deploy-to-<< parameters.environment >>
+                  if [ -f "./.circleci/scripts/deploy_to_test_live" ]; then
+                    ./.circleci/scripts/deploy_to_test_live
                   else
-                    ./vendor/ensembleiq/project_ci/scripts/pantheon/deploy-to-<< parameters.environment >>
+                    ./vendor/ensembleiq/project_ci/scripts/pantheon/deploy_to_test_live
                   fi
                 no_output_timeout: 30m
       - save_cache:
