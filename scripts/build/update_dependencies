@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eo pipefail
+
+echo "Updateing all dependencies for $CIRCLE_BRANCH"
+echo ""
+
+DEFAULT_PATH="$DOCROOT/sites/default"
+chmod -R u+rw "$DEFAULT_PATH"
+composer install --no-dev
+composer update  --no-dev
+composer install  --no-dev
+
+echo ""
+echo "Committing changes"
+echo ""
+git add .
+git commit -am "chore: Update dependencies for deploy to $CIRCLE_BRANCH
+
+Building on behalf of $CIRCLE_USERNAME
+See build at $CIRCLE_BUILD_URL"
+git push origin $CIRCLE_BRANCH
