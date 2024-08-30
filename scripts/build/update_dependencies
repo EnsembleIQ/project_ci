@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-echo "Updateing all dependencies for $CIRCLE_BRANCH"
+echo "Updating all dependencies for $CIRCLE_BRANCH"
 echo ""
 
 DEFAULT_PATH="$DOCROOT/sites/default"
