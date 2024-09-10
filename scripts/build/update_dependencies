@@ -7,9 +7,9 @@ echo ""
 
 DEFAULT_PATH="$DOCROOT/sites/default"
 chmod -R u+rw "$DEFAULT_PATH"
-composer install --no-dev --no-interaction
-composer update  --no-dev --no-interaction
-composer install  --no-dev --no-interaction
+composer install --no-dev --no-interaction --prefer-dist
+composer update  --no-dev --no-interaction --prefer-dist
+composer install  --no-dev --no-interaction --prefer-dist
 
 echo ""
 echo "Committing changes"
