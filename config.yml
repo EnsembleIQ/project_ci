@@ -231,7 +231,7 @@ jobs:
       - run:
           name: Set Github authentication
           command: composer config --global github-oauth.github.com "$GITHUB_TOKEN";
-      - run: "composer update  --no-dev"
+      - run: "composer update  --no-dev --no-interaction --prefer-dist"
       - run:
           name: Set up Git
           command: |
