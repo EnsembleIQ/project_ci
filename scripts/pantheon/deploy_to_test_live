@@ -21,7 +21,7 @@ then
 fi
 if [[ "$PUSH_DEPLOY_ENV" == 'live' ]]
 then
-  terminus -n backup:create --yes "$TERMINUS_SITE.$PUSH_DEPLOY_ENV" --element=db
+  terminus -n backup:create --yes "$TERMINUS_SITE.$PUSH_DEPLOY_ENV"
   terminus -n env:deploy --yes "$TERMINUS_SITE.$PUSH_DEPLOY_ENV"
 fi
 
