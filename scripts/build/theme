@@ -6,14 +6,6 @@ set -eo pipefail
 # This script performs all tasks related to the site theme.
 #
 
-echo "Compiling other themes..."
-
-# Take care of the non-emulsify theme.
-pushd ./themes/custom/ashday_foundation
-npm ci
-popd
-./node_modules/.bin/gulp compile_sass -S
-
 echo "Compiling Emulsify..."
 # Compile emulsify.
 pushd ./themes/custom/ensemble
