@@ -16,7 +16,7 @@
                 "[project-root]/.circleci/config.yml": {
                     "mode": "replace",
                     "path": "config.yml",
-                    "overwrite": true
+                    "overwrite": false
                 }
             }
         }
