@@ -17,7 +17,7 @@ then
 fi
 if [[ "$PUSH_DEPLOY_ENV" == 'test' ]]
 then
-  terminus -n env:deploy --yes "$TERMINUS_SITE.$PUSH_DEPLOY_ENV"
+  terminus -n env:deploy --yes "$TERMINUS_SITE.$PUSH_DEPLOY_ENV" --sync-content
 fi
 if [[ "$PUSH_DEPLOY_ENV" == 'live' ]]
 then
